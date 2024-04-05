@@ -11,7 +11,7 @@ import queue
 
 
 serial1, serial2, serial3, bancada = seriais.NumerosSeriais()
-camera = cam.Camera(bancada,exposicao=30000, ganho = 1)
+camera = cam.Camera(bancada,exposicao=60000, ganho = 10, fps=200)
 camera.conectar()
 
 
@@ -25,12 +25,13 @@ cv2.resizeWindow('1', 1216, 1936)
 data = []
 while True:
     try:
-        time.sleep(0.001)
+   
         img = camera.array
         #img= cv2.applyColorMap(camera.array, cv2.COLORMAP_PLASMA)
         
-        print(np.mean(img))
+        #print(np.mean(img))
         data.append(round(np.mean(img),2))
+        print(camera.fps_aquisitado,camera.fps_transferido)
         cv2.imshow('Frame',img)
         
         if cv2.waitKey(1) & 0xFF == ord('q'):

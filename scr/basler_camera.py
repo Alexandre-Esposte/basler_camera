@@ -7,7 +7,7 @@ import threading
 class Camera():
     """A classe sensor é responsável por fazer a conexão com a câmera e todas as ações relacionadas a câmera"""
 
-    def __init__(self,numero_serial: int = None, exposicao: int = 5000, ganho: int = 0):
+    def __init__(self,numero_serial: int = None, exposicao: int = 5000, ganho: int = 0, fps: float = 60):
 
         
 
@@ -17,18 +17,24 @@ class Camera():
 
         self.ganho = ganho # define o ganho da camera
 
+        self.fps = fps # Define o frame rate
+
         self.width = 0 # comprimento
 
         self.height = 0 # largura
         
         self.array = np.array([]) # Essa variável armazenara a matriz de intensidades, dessa forma podemos obter a imagem amostrada
 
+        self.fps_aquisitado = None
+
+        self.fps_transferido = None
+
     
         self.tl_factory = pylon.TlFactory.GetInstance() # Coisas da pylon
 
         self.devices = self.tl_factory.EnumerateDevices() # Obtem cameras conectadas ao computador
 
-        self.camera = None # Variavel que contera a instancia da camera
+        self.camera = None # Variavel que contem a instancia da camera
 
         self.movie = False # apenas uma flag para finalizar a filmagem
 
@@ -133,6 +139,7 @@ class Camera():
             self.camera.Gamma.value = 1
 
             self.camera.DeviceLinkThroughputLimitMode.SetValue('Off')
+            self.camera.AcquisitionFrameRateEnable.SetValue(True)
 
 
             self._fechar_camera()
@@ -230,8 +237,7 @@ class Camera():
         
         self._abrir_camera()
         self.camera.StartGrabbing(pylon.GrabStrategy_LatestImageOnly)
-
-        self.camera.AcquisitionFrameRate.SetValue(10)
+        self.camera.AcquisitionFrameRate.SetValue(self.fps)
 
         # Permitir que a câmera ajuste automaticamente a exposição, etc.
         #self.camera.ExposureAuto.SetValue("Continuous")
@@ -239,7 +245,8 @@ class Camera():
         self.movie=True
         while self.movie:
 
-            
+            self.fps_transferido = self.camera.BslResultingTransferFrameRate.GetValue()
+            self.fps_aquisitado  = self.camera.BslResultingAcquisitionFrameRate.GetValue()
             frame = self.camera.RetrieveResult(5000, pylon.TimeoutHandling_ThrowException)
             self.array = frame.Array
             frame.Release()
