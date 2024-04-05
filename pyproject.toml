@@ -1,0 +1,18 @@
+[tool.poetry]
+name = "basler-camera"
+version = "0.1.0"
+description = "\"Pacote para controlar funcionalidades das cameras basler aplicadas em sensores\""
+authors = ["Alexandre Esposte <alexandreesposte@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+pypylon = "^3.0.1"
+numpy = "^1.26.4"
+opencv-python = "^4.9.0.80"
+matplotlib = "^3.8.4"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

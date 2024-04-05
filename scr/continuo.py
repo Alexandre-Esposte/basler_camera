@@ -1,5 +1,5 @@
 import numpy as np
-import camera as cam
+import basler_camera as cam
 import watchdog 
 import matplotlib.pyplot as plt
 import cv2
@@ -26,8 +26,9 @@ data = []
 while True:
     try:
         time.sleep(0.001)
-        #img= cv2.applyColorMap(camera.array, cv2.COLORMAP_PLASMA)
         img = camera.array
+        #img= cv2.applyColorMap(camera.array, cv2.COLORMAP_PLASMA)
+        
         print(np.mean(img))
         data.append(round(np.mean(img),2))
         cv2.imshow('Frame',img)
