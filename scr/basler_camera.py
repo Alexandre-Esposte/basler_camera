@@ -7,7 +7,7 @@ import threading
 class Camera():
     """A classe sensor é responsável por fazer a conexão com a câmera e todas as ações relacionadas a câmera"""
 
-    def __init__(self,numero_serial: int = None, exposicao: int = 5000, ganho: int = 0, fps: float = 60):
+    def __init__(self,numero_serial: int = None, exposicao: int = 5000, ganho: int = 0, fps: float = 40):
 
         
 
@@ -58,7 +58,7 @@ class Camera():
 
         if desired_device == False:
             print("Conexao falhou: Verifique se o numero serial esta correto, camera nao encontrada\n")
-            return
+            return 
 
 
         try:
@@ -68,13 +68,16 @@ class Camera():
 
             if self._configuracoes():
                 print('Camera configurada com sucesso')
+                
             else:
                 print('Falha na configuracao')
+                
             
             
 
         except:
             print('Conexao falhou: Verifique se a camera esta conectada corretamente')
+            
 
     
     # Métodos para abrir e fechar a camera
@@ -120,8 +123,8 @@ class Camera():
         try:
             
             # Quantidade de bits utilizado para armazenar as intensidades na matriz
-            self.camera.PixelFormat.SetValue('Mono8')
-
+            self.camera.PixelFormat.SetValue('Mono12')
+            
             # Configurando quantidade de pixels que vamos usar nas linhas e colunas
             max_width = self.camera.WidthMax.GetValue()
             max_height = self.camera.HeightMax.GetValue()
@@ -138,15 +141,18 @@ class Camera():
             # Configurando o gamma
             self.camera.Gamma.value = 1
 
-            self.camera.DeviceLinkThroughputLimitMode.SetValue('Off')
-            self.camera.AcquisitionFrameRateEnable.SetValue(True)
+            
+            self.camera.DeviceLinkThroughputLimitMode.SetValue('Off') # Mudar isso caso o barramento usb não suporte
 
+            #self.camera.AcquisitionFrameRateEnable.SetValue(True) # em algumas cameras nao funciona
 
+            
             self._fechar_camera()
                 
             return True
-        except:
+        except Exception as err:
             self._fechar_camera()
+            print(f"Erro: {err}")
             return False
 
     
@@ -233,13 +239,13 @@ class Camera():
 
     # ----- Métodos para filmagens ------
 
-    def filme(self):
+    def filme(self,tempo = 10):
         
         self._abrir_camera()
         self.camera.StartGrabbing(pylon.GrabStrategy_LatestImageOnly)
         self.camera.AcquisitionFrameRate.SetValue(self.fps)
 
-        # Permitir que a câmera ajuste automaticamente a exposição, etc.
+        #Permitir que a câmera ajuste automaticamente a exposição, etc.
         #self.camera.ExposureAuto.SetValue("Continuous")
 
         self.movie=True
@@ -249,13 +255,13 @@ class Camera():
             self.fps_aquisitado  = self.camera.BslResultingAcquisitionFrameRate.GetValue()
             frame = self.camera.RetrieveResult(5000, pylon.TimeoutHandling_ThrowException)
             self.array = frame.Array
+
             frame.Release()
         
         self.camera.StopGrabbing()
         self._fechar_camera()
 
-        return
-
+        return 
 
     # Obter temperatura    
 
